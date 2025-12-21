@@ -1,0 +1,17 @@
+# Environments & deps
+venv/
+node_modules/
+__pycache__/
+
+# Ignore uploads content but keep folder
+backend/uploads/*
+!backend/uploads/
+!backend/uploads/.gitkeep
+
+# Ignore chroma db
+chroma_db/*
+!chroma_db/
+!chroma_db/.gitkeep
+
+# Env file
+.env

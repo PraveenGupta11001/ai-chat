@@ -1,0 +1,26 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from backend.api.file_routes import router as file_router
+from backend.api.chat_routes import router as chat_router
+
+app = FastAPI(title="AI Search Chat API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all for dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(file_router)
+app.include_router(chat_router)
+
+from fastapi.staticfiles import StaticFiles
+import os
+os.makedirs("backend/uploads", exist_ok=True)
+app.mount("/api/pdf/files", StaticFiles(directory="backend/uploads"), name="pdf_files")
+
+@app.get("/")
+async def root():
+    return {"message": "AI Search Chat API is running"}
