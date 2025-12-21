@@ -40,6 +40,7 @@ interface ChatState {
     addToolCall: (toolCall: ToolCall) => void;
     addCitation: (citation: Citation) => void;
     setUIComponent: (component: UIComponent) => void;
+    clearMessages: () => void;
     openPDF: (url: string, page?: number) => void;
     closePDF: () => void;
 }
@@ -110,4 +111,5 @@ export const useChatStore = create<ChatState>((set) => ({
     }),
     openPDF: (url, page) => set({ pdfViewer: { isOpen: true, fileUrl: url, pageNumber: page } }),
     closePDF: () => set({ pdfViewer: { isOpen: false, fileUrl: null } }),
+    clearMessages: () => set({ messages: [], isStreaming: false, pdfViewer: { isOpen: false, fileUrl: null } }),
 }));

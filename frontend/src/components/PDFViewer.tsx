@@ -55,7 +55,7 @@ export const PDFViewer: React.FC = () => {
     return (
         <div className="flex flex-col h-full bg-zinc-100 dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm z-10">
-                <h2 className="font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-[200px]">
+                <h2 className="font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-50">
                     Document Viewer
                 </h2>
                 <div className="flex items-center gap-2">

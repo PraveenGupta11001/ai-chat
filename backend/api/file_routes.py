@@ -19,3 +19,10 @@ async def upload_file(file: UploadFile = File(...)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reset")
+async def reset_database():
+    success = file_service.reset_vector_store()
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to reset database")
+    return {"message": "Database reset successfully"}

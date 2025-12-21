@@ -17,6 +17,7 @@ jobs = {}
 
 class ChatRequest(BaseModel):
     query: str
+    thread_id: str = "default"
 
 async def process_chat(job_id: str, query: str, thread_id: str = "default"):
     job = jobs.get(job_id)
