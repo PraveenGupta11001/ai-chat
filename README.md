@@ -1,352 +1,160 @@
 # AI Search Chat with PDF Citation Viewer
 
-A Perplexity-style chat interface built with Next.js 14+ and FastAPI, featuring real-time streaming, generative UI components, and an interactive PDF viewer with citation linking.
+A lightweight **Perplexity‑style** chat application that streams AI responses in real‑time, displays tool‑call progress, and lets users view source PDFs with clickable citations. The UI is polished with a dark/light theme, borderless input, subtle shadows, and smooth animations.
+
+---
+
+## Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Setup & Installation](#setup--installation)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+- [Running the Application](#running-the-application)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Features
+- **Real‑time SSE streaming** – AI replies appear character‑by‑character with an immediate *Thinking…* indicator.
+- **Tool‑call visualization** – Shows steps such as *Searching documents…* or *Using <tool>* while the model works.
+- **Citation linking** – Inline `[1]` style citations open the corresponding PDF in a split‑view viewer.
+- **General‑knowledge handling** – The agent answers pure factual questions directly without unnecessary document searches.
+- **Theme synchronization** – Dark and light modes stay consistent across all components (bubbles, buttons, input field).
+- **Premium UI** – Borderless input box, subtle backdrop‑blur shadows, smooth hover/active animations.
+- **Data retention** – Background task clears uploaded files and vector store every hour.
+- **Health‑check** – `/api/health` endpoint pinged every 14 minutes to keep the connection alive.
+- **File support** – Upload and search `.pdf`, `.txt`, `.md`, `.json`, `.docx`, `.xml`, and image files (OCR via EasyOCR).
 
-- **Real-time Streaming**: AI responses are streamed character-by-character using Server-Sent Events (SSE).
-- **Generative UI**: Dynamic UI components (charts, cards) are rendered alongside text responses.
-- **Citation Linking**: Clickable citations in the chat open the source PDF in a split-view.
-- **PDF Viewer**: Integrated PDF viewer with zoom and page navigation.
-- **Tool Call Visualization**: Shows reasoning steps (e.g., "Searching...", "Analyzing...") during generation.
+---
 
 ## Tech Stack
+**Frontend**
+- **Next.js 14** (App Router) – React framework with server‑side rendering.
+- **TypeScript** – Strict typing for safety.
+- **Tailwind CSS** – Utility‑first styling.
+- **Zustand** – Global state management (chat history, theme, PDF viewer).
+- **Framer Motion** – Animations for UI transitions.
+- **React‑PDF** – PDF rendering inside the viewer.
+- **Lucide React** – Icon set.
 
-### Frontend
-- **Next.js 14+** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Zustand** (State Management)
-- **Framer Motion** (Animations)
-- **React PDF** (PDF Rendering)
-- **Lucide React** (Icons)
+**Backend**
+- **Python 3.11+** – Core language.
+- **FastAPI** – High‑performance API server.
+- **Uvicorn** – ASGI server.
+- **LangChain (Groq)** – LLM integration with streaming support.
+- **LangGraph** – Graph‑based agent workflow.
+- **Asyncio Queue** – Simple in‑process job queue (no external broker).
+- **Chroma** – Vector store for document embeddings.
+- **EasyOCR** – OCR for image uploads.
+- **pdfplumber** – PDF text extraction.
 
-### Backend
-- **Python 3.10+**
-- **FastAPI**
-- **Uvicorn**
-- **PyPDF2** (PDF Processing)
-- **Asyncio** (Queue System)
-
-## Setup Instructions
-
-### Prerequisites
-- Node.js 18+
-- Python 3.10+
-
-### Backend Setup
-
-1. Navigate to the project root:
-   ```bash
-   cd /path/to/project
-   ```
-
-2. Create and activate a virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install fastapi uvicorn pydantic python-multipart pypdf2
-   ```
-
-4. Run the server:
-   ```bash
-   uvicorn backend.main:app --reload --port 8000
-   ```
-   The API will be available at `http://localhost:8000`.
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-   The application will be available at `http://localhost:3000`.
+---
 
 ## Architecture Overview
-
-1. **User Query**: User sends a message via the Chat Interface.
-2. **Job Creation**: Backend creates a job ID and starts a background task.
-3. **Streaming**: Frontend connects to `/api/chat/stream/{job_id}` via SSE.
-4. **Generation**: Backend simulates (or performs) RAG:
-   - Searches documents (Mocked).
-   - Extracts text from PDFs.
-   - Generates response chunks, tool calls, and citations.
-   - Pushes events to the job queue.
-5. **Rendering**: Frontend consumes events and updates the UI state (Zustand).
-6. **Interaction**: User clicks a citation -> PDF Viewer opens in split view.
-
-## Design Decisions
-
-- **Asyncio Queue**: Used for simplicity to handle the job queue without external dependencies like Redis, fitting the "2-3 days" scope.
-- **Zustand**: Chosen for global state management to easily share state between Chat and PDF Viewer components.
-- **Server-Sent Events (SSE)**: Selected for unidirectional streaming of text and UI updates, which is efficient for this use case.
-
-
-
-
-
-
-hi i need you fix the @../../FullStackAI_Project what it lacks not conversing good and thing - 
-
-"""
-Full Stack AI Developer Take-Home Assignment – Optimized Prompt
-
-Time Estimate: 2–3 days
-Stack: Next.js 14+ (App Router) + Python (FastAPI)
-Project: AI Search Chat with PDF Citation Viewer & Generative UI
-
-Goal:
-Build a Perplexity-style AI chat interface where AI responses are streamed in real-time along with generative UI components, citations, and tool calls. Clicking citations transitions to a PDF viewer showing highlighted source sections. The focus is on clean design, responsive layout, smooth streaming, and polished UI/UX.
-
-Core Features
-
-1. Chat Interface (Perplexity-style)
-
-Clean, centered chat layout with clear distinction between user and AI messages.
-
-Each AI message includes:
-
-User query
-
-AI response with real-time streaming effect
-
-Optional generative UI components (charts, cards, tables) rendered alongside text
-
-Numbered inline citations [1], [2], …
-
-Source cards below each response showing cited documents
-
-Tool call indicators showing reasoning steps (e.g., "Searching documents…", "Analyzing results…")
-
-2. Streaming Responses with Generative UI
-
-Implement Server-Sent Events (SSE) for real-time streaming
-
-Stream multiple content types:
-
-Text chunks: Incremental AI response text
-
-Tool calls: Show step-by-step reasoning (e.g., thinking, searching_documents, retrieving_pdf)
-
-Generative UI components: Stream React components progressively (charts, tables, info cards) – optional but preferred
-
-Citations: Appear inline as response generates
-
-Show a typing indicator before streaming starts
-
-Display step-by-step tool reasoning as executed
-
-3. PDF Viewer with Animated Transition
-
-Clicking a citation [1], [2], etc., triggers:
-
-Smooth slide-in + scale/fade animation from chat to split-view layout (chat + PDF)
-
-PDF Viewer features:
-
-Display the source PDF
-
-Automatically highlight & scroll to relevant section
-
-Navigation: page up/down, zoom, search
-
-Close button to return to chat-only view with reverse animation
-
-Maintain chat scroll position during transitions
-
-4. UI/UX Requirements
-
-Chat Interface:
-
-Minimal, clean, Perplexity-inspired design
-
-Responsive, mobile-first layout
-
-Clickable numbered citations [1]
-
-Source cards below responses with document metadata
-
-Loading states:
-
-Typing indicator with animated dots
-
-Streaming cursor/pulse effect
-
-Tool call progress indicators ("Searching…", "Reading PDF…")
-
-Generative UI components appear with smooth fade-in animations
-
-PDF Viewer Transition:
-
-Entry animation: smooth slide-in from right, scale/fade (300–400ms)
-
-Exit animation: reverse of entry
-
-Responsive:
-
-Mobile: PDF viewer takes full screen
-
-Desktop: Split view (60/40 chat/PDF)
-
-Technical Requirements
-
-Frontend (Next.js 14+)
-
-Next.js 14+ with App Router
-
-TypeScript with strict typing
-
-Framer Motion for animations (transitions, generative UI reveals) – optional
-
-react-pdf or @react-pdf-viewer/core for PDF rendering – optional
-
-Tailwind CSS for styling
-
-Zustand for global state (chat history, PDF viewer state) – preferred
-
-TanStack Query (React Query) for API requests and SSE handling – preferred
-
-Backend (Python + FastAPI)
-
-FastAPI for REST API and SSE endpoints
-
-Python 3.11+
-
-Pydantic for request/response validation
-
-Queue system for request management – optional but preferred
-
-Redis Queue (RQ) / Celery / or in-memory asyncio.Queue
-
-Enqueue generation requests for concurrency & rate limiting
-
-Return job ID immediately, stream results via SSE
-
-PDF processing:
-
-PyPDF2 or pdfplumber for text extraction
-
-Store PDF metadata and page-to-text mappings
-
-Deliverables
-
-GitHub Repository
-
-/frontend – Next.js app
-
-/backend – FastAPI app
-
-docker-compose.yml – optional but recommended for full stack
-
-README.md
-
-Setup instructions: backend, frontend, env variables, running locally
-
-Architecture overview: frontend ↔ backend ↔ queue flow diagram, streaming protocol
-
-Screenshots/GIFs: tool call streaming, generative UI rendering, citation → PDF transition
-
-Libraries used with versions & justification
-
-Design decisions: queue system, generative UI approach, trade-offs
-
-Code Quality
-
-TypeScript: strict typing, no any
-
-Python: type hints, Pydantic models
-
-Graceful error handling
-
-Document complex logic
-
-Logical file structure and separation of concerns
-
-Evaluation Criteria
-
-Streaming Implementation (25%)
-
-Smooth, real-time text streaming
-
-Tool calls display correctly (optional)
-
-Generative UI components render progressively (optional)
-
-PDF Viewer & Transitions (20%)
-
-Smooth animations
-
-Accurate citation highlighting
-
-Backend Architecture (20%)
-
-Proper queue implementation (optional)
-
-SSE streaming works reliably
-
-Clean API design
-
-Code Quality (20%)
-
-TypeScript/Python best practices
-
-Proper error handling
-
-State management (Zustand + React Query) preferred
-
-UI/UX Polish (15%)
-
-Perplexity-style aesthetic
-
-Responsive design
-
-Loading states and feedback
-
-Bonus Points (Optional)
-
-Docker setup with docker-compose
-
-Dark mode toggle
-
-PDF text search highlighting
-
-References for Guidance
-
-Generative UI: Google Research
-
-LangChain Generative UI React
-
-AI SDK UI
-
-CopilotKit Docs
-
-LangGraph Streaming Docs
-
-✅ Focus Tip:
-Prioritize clean, working streaming chat, PDF citation handling, and smooth UI transitions. Optional features like generative UI components and queue systems are bonus, but a polished subset with correct streaming & citations is better than an incomplete full implementation.
-"""
-
-what else theme need to add and style looks more visually good and check for error 
-
-note - 
-- only change in @../../FullStackAI_Project in this directory
-- you can refer for things in this directory and only read and no change is allowed here okay @../rag-practice/coldemailer-agent and others but no change anywhere
-
-and make test to 100 diff variations for correctness
-
-other things to add-
-- the user can add file too like pdf, img, use pdf reader and give text to llm, for img only ocr type means only we read text from it using python or js whatever and give llm prompt what user want like online i do with chatgpt okay need to add in frontend the + icon too and make it better and you have permission to change in give allowed directory and also can run cmd yourself okay
+1. **User Query** – Sent from the chat UI to `POST /api/chat/`.
+2. **Job Creation** – Backend generates a unique `job_id` and starts an async task.
+3. **Streaming** – The task yields events (`text`, `tool_call`, `citation`) via **Server‑Sent Events** (`GET /api/chat/stream/{job_id}`).
+4. **Frontend Consumption** – The client listens to SSE, updates the chat bubble, shows tool‑call status, and adds citations.
+5. **PDF Viewer** – Clicking a citation opens the PDF viewer (split‑view on desktop, full‑screen on mobile) and scrolls to the relevant page.
+6. **Background Tasks** –
+   - **Data Retention** – Every hour, `file_service.reset_vector_store()` clears uploads and vector data.
+   - **Health Check** – Every 14 minutes the frontend pings `/api/health` to keep the server warm.
+
+---
+
+## Setup & Installation
+### Prerequisites
+- **Node.js** ≥ 18
+- **Python** ≥ 3.10
+- **Git**
+- **Virtual environment** (recommended)
+
+### Backend
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/yourusername/FullStackAI_Project.git
+cd FullStackAI_Project
+
+# Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+
+# Install Python dependencies
+pip install -r requirements.txt   # or pip install fastapi uvicorn langchain-groq langgraph chromadb easyocr pdfplumber
+
+# Run the server (default port 8000)
+uvicorn backend.main:app --reload --port 8000
+```
+The backend will be reachable at `http://localhost:8000`.
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev   # defaults to http://localhost:3000
+```
+The UI will automatically open in your default browser.
+
+---
+
+## Running the Application
+1. **Start the backend** (see above). Ensure the virtual environment is active.
+2. **Start the frontend** (`npm run dev`).
+3. Open `http://localhost:3000` in a browser.
+4. Upload documents via the **+** button, then ask questions.
+5. Click citation numbers to view source PDFs.
+
+---
+
+## Testing
+The repository includes a few test scripts:
+- `test_backend.py` – sanity checks for the health endpoint and file upload.
+- `test_refinements.py` – verifies general‑knowledge handling and citation extraction.
+Run them with:
+```bash
+pytest test_backend.py test_refinements.py
+```
+All tests should pass (`0 failures`).
+
+---
+
+## Project Structure
+```
+FullStackAI_Project/
+├─ backend/                # FastAPI server
+│   ├─ api/                # Routers (chat, file)
+│   ├─ core/               # Settings & config
+│   ├─ services/           # FileService, AgentService
+│   └─ main.py
+├─ frontend/               # Next.js app
+│   ├─ src/components/     # ChatInterface, MessageBubble, PDFViewer
+│   ├─ src/lib/            # Zustand store, utils
+│   └─ tailwind.config.js
+├─ chroma_db/              # Vector store files (generated)
+├─ README.md               # This document
+└─ requirements.txt        # Python deps
+```
+
+---
+
+## Contributing
+Contributions are welcome! Please:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/awesome-feature`).
+3. Ensure code follows existing style (TypeScript strict, Python type hints).
+4. Run tests (`pytest`).
+5. Open a Pull Request with a clear description.
+
+---
+
+## License
+This project is licensed under the **MIT License** – see the `LICENSE` file for details.
+
+---
+
+*Enjoy building and extending the AI Search Chat! 🚀*
