@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 interface MessageBubbleProps {
     message: Message;
 }
@@ -20,7 +21,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
     const handleCitationClick = (citation: any) => {
         const filename = citation.link || citation.text || "source_document.pdf";
-        const pdfUrl = `http://localhost:8000/api/pdf/files/${filename}`;
+        const pdfUrl = `${BACKEND_URL}/api/pdf/files/${filename}`;
         openPDF(pdfUrl, 1);
     };
 
