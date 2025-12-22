@@ -34,6 +34,9 @@ interface ChatState {
         fileUrl: string | null;
         pageNumber?: number;
     };
+    isDarkMode: boolean;
+    toggleTheme: () => void;
+    setTheme: (isDark: boolean) => void;
     addMessage: (message: Message) => void;
     updateLastMessage: (content: string) => void;
     setStreaming: (isStreaming: boolean) => void;
@@ -49,6 +52,20 @@ export const useChatStore = create<ChatState>((set) => ({
     messages: [],
     isStreaming: false,
     pdfViewer: { isOpen: false, fileUrl: null },
+    isDarkMode: false,
+    toggleTheme: () => set((state) => {
+        const newMode = !state.isDarkMode;
+        if (typeof document !== 'undefined') {
+            document.documentElement.classList.toggle('dark', newMode);
+        }
+        return { isDarkMode: newMode };
+    }),
+    setTheme: (isDark) => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.classList.toggle('dark', isDark);
+        }
+        set({ isDarkMode: isDark });
+    },
     addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
     updateLastMessage: (content) => set((state) => {
         const lastMessage = state.messages[state.messages.length - 1];

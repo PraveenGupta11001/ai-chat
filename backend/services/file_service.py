@@ -57,7 +57,7 @@ class FileService:
                 text = "\n".join([para.text for para in doc.paragraphs])
                 logger.info(f"Extracted {len(text)} characters from DOCX {filename}")
                 
-            elif ext in [".txt", ".md", ".py", ".js", ".ts", ".tsx", ".html", ".css", ".json", ".lock"]:
+            elif ext in [".txt", ".md", ".py", ".js", ".ts", ".tsx", ".html", ".css", ".json", ".lock", ".xml"]:
                 try:
                     text = file_content.decode("utf-8")
                 except UnicodeDecodeError:

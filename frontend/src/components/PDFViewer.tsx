@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 import { useChatStore } from '@/lib/store';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -55,15 +55,18 @@ export const PDFViewer: React.FC = () => {
     return (
         <div className="flex flex-col h-full bg-zinc-100 dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm z-10">
-                <h2 className="font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-50">
-                    Document Viewer
-                </h2>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setScale(s => Math.max(0.5, s - 0.1))} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                    <FileText size={18} className="text-indigo-600" />
+                    <h2 className="font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-50">
+                        Document Viewer
+                    </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setScale(s => Math.max(0.5, s - 0.1))} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-zinc-800 dark:text-zinc-400">
                         <ZoomOut size={18} />
                     </button>
                     <span className="text-xs text-zinc-500 w-10 text-center font-medium">{Math.round(scale * 100)}%</span>
-                    <button onClick={() => setScale(s => Math.min(2.0, s + 0.1))} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                    <button onClick={() => setScale(s => Math.min(2.0, s + 0.1))} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-zinc-800 dark:text-zinc-400">
                         <ZoomIn size={18} />
                     </button>
                     <div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-2" />
@@ -73,7 +76,7 @@ export const PDFViewer: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center bg-zinc-200/50 dark:bg-zinc-950/50">
+            <div className="flex-1 overflow-auto p-4 md:p-12 flex justify-center bg-zinc-200/50 dark:bg-zinc-950/50 scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-800">
                 {error ? (
                     <div className="flex flex-col items-center justify-center p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-xl text-red-600 dark:text-red-400 max-w-md text-center">
                         <X size={48} className="mb-4 opacity-50" />
@@ -84,7 +87,7 @@ export const PDFViewer: React.FC = () => {
                     <Document
                         file={pdfViewer.fileUrl}
                         onLoadSuccess={onDocumentLoadSuccess}
-                        className="shadow-2xl rounded-sm overflow-hidden"
+                        className="shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm overflow-hidden"
                     >
                         <Page
                             pageNumber={pageNumber}
@@ -110,7 +113,7 @@ export const PDFViewer: React.FC = () => {
                         onClick={() => setPageNumber(p => p - 1)}
                         className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl disabled:opacity-30 transition-colors"
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={20} color="white" />
                     </button>
                     <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 tabular-nums">
                         Page {pageNumber} <span className="opacity-40 mx-1">/</span> {numPages}
@@ -120,7 +123,7 @@ export const PDFViewer: React.FC = () => {
                         onClick={() => setPageNumber(p => p + 1)}
                         className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl disabled:opacity-30 transition-colors"
                     >
-                        <ChevronRight size={20} />
+                        <ChevronRight size={20} color="white" />
                     </button>
                 </div>
             )}

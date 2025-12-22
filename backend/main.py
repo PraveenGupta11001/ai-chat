@@ -24,3 +24,19 @@ app.mount("/api/pdf/files", StaticFiles(directory="backend/uploads"), name="pdf_
 @app.get("/")
 async def root():
     return {"message": "AI Search Chat API is running"}
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "success"}
+
+import asyncio
+from backend.services.file_service import file_service
+
+async def periodic_cleanup():
+    while True:
+        await asyncio.sleep(3600) # 1 hour
+        file_service.reset_vector_store()
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(periodic_cleanup())

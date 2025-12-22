@@ -16,9 +16,8 @@ const PDFViewer = dynamic(() => import('./PDFViewer').then(mod => mod.PDFViewer)
 });
 
 export const ChatInterface: React.FC = () => {
-    const { messages, addMessage, updateLastMessage, setStreaming, isStreaming, addToolCall, addCitation, setUIComponent, pdfViewer, clearMessages } = useChatStore();
+    const { messages, addMessage, updateLastMessage, setStreaming, isStreaming, addToolCall, addCitation, setUIComponent, pdfViewer, clearMessages, isDarkMode, toggleTheme, setTheme } = useChatStore();
     const [input, setInput] = useState('');
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<string | null>(null);
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -35,20 +34,30 @@ export const ChatInterface: React.FC = () => {
     }, [messages]);
 
     useEffect(() => {
-        // Initialize theme
+        // Sync store with DOM on mount
         const isDark = document.documentElement.classList.contains('dark');
-        setIsDarkMode(isDark);
-    }, []);
+        setTheme(isDark);
+    }, [setTheme]);
 
-    const toggleTheme = () => {
-        const newMode = !isDarkMode;
-        setIsDarkMode(newMode);
-        if (newMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
+    useEffect(() => {
+        const healthCheck = async () => {
+            try {
+                const res = await fetch('http://localhost:8000/api/health');
+                if (res.ok) {
+                    console.log('Health check success');
+                }
+            } catch (err) {
+                console.error('Health check failed', err);
+            }
+        };
+
+        // Call immediately on mount
+        healthCheck();
+
+        // Set interval for 14 minutes (14 * 60 * 1000 ms)
+        const interval = setInterval(healthCheck, 14 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -276,7 +285,12 @@ export const ChatInterface: React.FC = () => {
                                     <button
                                         key={item}
                                         onClick={() => setInput(item)}
-                                        className="p-3 text-sm font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors text-left text-zinc-900 dark:text-zinc-100"
+                                        className={cn(
+                                            "p-3 text-sm font-medium border rounded-xl transition-colors text-left",
+                                            isDarkMode
+                                                ? "bg-zinc-900 border-zinc-800 text-zinc-100 hover:border-indigo-500"
+                                                : "bg-white border-zinc-200 text-zinc-900 hover:border-indigo-500"
+                                        )}
                                     >
                                         {item}
                                     </button>
@@ -333,10 +347,10 @@ export const ChatInterface: React.FC = () => {
 
                         <form onSubmit={handleSubmit} className="relative group">
                             <div className={cn(
-                                "flex items-center gap-2 p-2 rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-xl focus-within:ring-4 focus-within:ring-indigo-500/10",
+                                "flex items-center gap-2 p-2 rounded-2xl transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] focus-within:shadow-[0_8px_30px_rgb(79,70,229,0.1)] focus-within:ring-1 focus-within:ring-indigo-500/20",
                                 isDarkMode
-                                    ? "bg-zinc-900 border-zinc-800 focus-within:border-indigo-500/50"
-                                    : "bg-white border-zinc-200 focus-within:border-indigo-500/50"
+                                    ? "bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/30 focus-within:border-indigo-500/30"
+                                    : "bg-white/90 backdrop-blur-xl border border-zinc-200/50 focus-within:border-indigo-500/20"
                             )}>
                                 <button
                                     type="button"
@@ -359,7 +373,7 @@ export const ChatInterface: React.FC = () => {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder="Ask anything about your documents..."
-                                    className="flex-1 bg-transparent border-none focus:ring-0 py-4 text-base placeholder-zinc-500"
+                                    className="flex-1 bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 py-4 text-base placeholder-zinc-500"
                                     disabled={isStreaming}
                                 />
                                 <button
@@ -389,7 +403,7 @@ export const ChatInterface: React.FC = () => {
                         className="w-1/2 h-full bg-zinc-100 dark:bg-zinc-900 shadow-2xl z-20 border-l border-zinc-200 dark:border-zinc-800"
                     >
                         <div className="h-full flex flex-col">
-                            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900">
+                            {/* <div className="p-4 border-b border-zinc-200 text-white dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900">
                                 <h3 className="font-bold flex items-center gap-2">
                                     <FileText size={18} className="text-indigo-600" />
                                     Document Viewer
@@ -400,7 +414,7 @@ export const ChatInterface: React.FC = () => {
                                 >
                                     <X size={20} />
                                 </button>
-                            </div>
+                            </div> */}
                             <div className="flex-1 overflow-hidden">
                                 <PDFViewer />
                             </div>

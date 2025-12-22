@@ -12,6 +12,7 @@ from langchain_core.tools import create_retriever_tool
 import json
 import logging
 import os
+import asyncio
 
 # Setup logger
 logger = logging.getLogger("uvicorn.error")
@@ -88,15 +89,17 @@ async def agent(state: AgentState, config):
     
     # Always prepend system message for every model call to ensure instructions are followed
     system_prompt = SystemMessage(content="""You are a professional AI assistant for searching and analyzing uploaded documents.
-Your goal is to provide accurate, concise, and well-formatted answers based ONLY on the provided documents.
+Your goal is to provide accurate, concise, and well-formatted answers.
 
-1. **Search First**: Before answering any question about documents, ALWAYS use the `search_documents` tool.
-2. **List Documents**: Use the `list_documents` tool if the user asks what files are available or uploaded.
-3. **Citations**: Always cite your sources using [1], [2], etc. based on the filenames provided in the search results.
-3. **No Results**: If the tool returns no relevant information, clearly state that you couldn't find it in the uploaded documents.
-4. **History**: Maintain a conversational tone and refer to previous parts of the chat when relevant.
+1. **Search Strategy**: 
+   - If the question is a clear general knowledge question (e.g., "What is potassium?", "Who is Einstein?", "How many planets are there?") that is obviously unrelated to the documents, ANSWER DIRECTLY from your own knowledge. DO NOT use `search_documents`.
+   - If the question is about the uploaded documents, or if you are unsure if the documents contain the answer, ALWAYS use the `search_documents` tool first.
+   - If you search and find no relevant information, answer using your own knowledge but mention that the documents didn't contain the info.
+2. **List Documents**: Use the `list_documents` tool if the user asks what files are available.
+3. **Citations**: Always cite your sources using [1], [2], etc. when using information from the documents.
+4. **Tone**: Maintain a helpful, professional, and friendly tone.
 5. **Formatting**: Use Markdown (bold, lists, code blocks) for clarity.
-6. **Images**: If the user asks about an image, explain that you can currently only see the filename and metadata, but cannot "see" the visual content unless text was extracted.""")
+6. **Images**: If the user asks about an image, explain that you can currently only see the filename and metadata.""")
     
     messages_with_system = [system_prompt] + messages
     
@@ -145,27 +148,41 @@ class AgentService:
         citation_count = 0
         seen_citations = set()
         
-        async for event in app.astream_events(inputs, version="v1", config=config):
+        # Yield an initial thinking status
+        yield json.dumps({"type": "tool_call", "content": "Thinking..."})
+        
+        text_yielded = False
+        last_yield_time = asyncio.get_event_loop().time()
+        
+        async for event in app.astream_events(inputs, version="v2", config=config):
             kind = event["event"]
             
             if kind == "on_chat_model_stream":
                 content = event["data"]["chunk"].content
                 if content:
+                    text_yielded = True
+                    last_yield_time = asyncio.get_event_loop().time()
                     yield json.dumps({"type": "text", "content": content})
+            
+            elif kind == "on_chat_model_end":
+                output = event["data"].get("output")
+                if output and not text_yielded:
+                    content = getattr(output, "content", None)
+                    if content:
+                        text_yielded = True
+                        last_yield_time = asyncio.get_event_loop().time()
+                        yield json.dumps({"type": "text", "content": content})
             
             elif kind == "on_tool_start":
                 tool_name = event["name"]
-                if tool_name == "search_documents":
-                    yield json.dumps({"type": "tool_call", "content": "Searching documents"})
-                else:
-                    yield json.dumps({"type": "tool_call", "content": f"Using {tool_name}"})
+                status_msg = "Searching documents..." if tool_name == "search_documents" else f"Using {tool_name}..."
+                yield json.dumps({"type": "tool_call", "content": status_msg})
+                last_yield_time = asyncio.get_event_loop().time()
             
             elif kind == "on_tool_end":
-                # Check if it's the search_documents tool to extract citations
                 if event["name"] == "search_documents":
                     output = event["data"].get("output")
                     if output and isinstance(output, str):
-                        # Extract filenames from the custom tool output format
                         import re
                         sources = re.findall(r"Source: (.*?)\n", output)
                         for source in sources:
@@ -179,5 +196,9 @@ class AgentService:
                                     "text": filename, 
                                     "link": filename
                                 })
+                last_yield_time = asyncio.get_event_loop().time()
+
+            # Heartbeat check (if needed, but astream_events is usually busy)
+            # If we wanted a real heartbeat, we'd need a separate task or a more complex loop
 
 agent_service = AgentService()
