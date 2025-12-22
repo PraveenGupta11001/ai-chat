@@ -1,13 +1,17 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from backend.api.file_routes import router as file_router
 from backend.api.chat_routes import router as chat_router
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI(title="AI Search Chat API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all for dev
+    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -16,8 +20,6 @@ app.add_middleware(
 app.include_router(file_router)
 app.include_router(chat_router)
 
-from fastapi.staticfiles import StaticFiles
-import os
 os.makedirs("backend/uploads", exist_ok=True)
 app.mount("/api/pdf/files", StaticFiles(directory="backend/uploads"), name="pdf_files")
 

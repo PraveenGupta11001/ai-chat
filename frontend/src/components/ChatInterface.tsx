@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import dynamic from 'next/dynamic';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
 const PDFViewer = dynamic(() => import('./PDFViewer').then(mod => mod.PDFViewer), {
     ssr: false,
     loading: () => <div className="flex items-center justify-center h-full">Loading PDF Viewer...</div>
@@ -42,7 +44,7 @@ export const ChatInterface: React.FC = () => {
     useEffect(() => {
         const healthCheck = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/health');
+                const res = await fetch(`${BACKEND_URL}/api/health`);
                 if (res.ok) {
                     console.log('Health check success');
                 }
@@ -83,7 +85,7 @@ export const ChatInterface: React.FC = () => {
             formData.append('file', file);
 
             try {
-                const res = await fetch('http://localhost:8000/api/pdf/upload', {
+                const res = await fetch(`${BACKEND_URL}/api/pdf/upload`, {
                     method: 'POST',
                     body: formData,
                 });
@@ -147,7 +149,7 @@ export const ChatInterface: React.FC = () => {
             }
 
             // 2. Send chat request
-            const res = await fetch('http://localhost:8000/api/chat/', {
+            const res = await fetch(`${BACKEND_URL}/api/chat/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: userMessage.content, thread_id: sessionId }),
@@ -159,7 +161,7 @@ export const ChatInterface: React.FC = () => {
             }
 
             const { job_id } = await res.json();
-            const eventSource = new EventSource(`http://localhost:8000/api/chat/stream/${job_id}?thread_id=${sessionId}`);
+            const eventSource = new EventSource(`${BACKEND_URL}/api/chat/stream/${job_id}?thread_id=${sessionId}`);
 
             eventSource.onmessage = (event) => {
                 const rawData = event.data.trim();
@@ -246,7 +248,7 @@ export const ChatInterface: React.FC = () => {
                             onClick={async () => {
                                 if (window.confirm('Are you sure you want to clear all messages and reset the document database?')) {
                                     try {
-                                        await fetch('http://localhost:8000/api/pdf/reset', { method: 'POST' });
+                                        await fetch(`${BACKEND_URL}/api/pdf/reset`, { method: 'POST' });
                                         clearMessages();
                                         window.location.reload();
                                     } catch (err) {
