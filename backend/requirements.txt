@@ -1,18 +1,32 @@
+# Core API
 fastapi
 uvicorn[standard]
+python-dotenv
+python-multipart
+
+# Validation / utils
 pydantic
 pydantic-settings
-python-dotenv
-
+orjson
 requests
 httpx
-orjson
 
+# LangChain ecosystem 
 langchain
 langchain-core
+langchain-community
+langchain-text-splitters
 langgraph
 langsmith
+langchain-chroma
 
+# Vector DB
 chromadb
 
-python-multipart
+# LLM
+langchain-groq
+
+# File handling
+pillow
+pdfplumber
+python-docx
