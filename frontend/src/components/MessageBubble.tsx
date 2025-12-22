@@ -14,8 +14,9 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.role === 'user';
-    const { openPDF, isStreaming } = useChatStore();
+    const { openPDF, isStreaming, isDarkMode, messages } = useChatStore();
     const [copied, setCopied] = useState(false);
+    const isLastMessage = message.id === messages[messages.length - 1]?.id;
 
     const handleCitationClick = (citation: any) => {
         const filename = citation.link || citation.text || "source_document.pdf";
@@ -54,8 +55,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 <div className={cn(
                     "relative p-4 rounded-2xl shadow-sm text-sm md:text-base leading-relaxed",
                     isUser
-                        ? "bg-indigo-600 text-white rounded-tr-none"
-                        : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-tl-none"
+                        ? "bg-indigo-600 text-white rounded-tr-none shadow-md"
+                        : isDarkMode
+                            ? "bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-none shadow-sm"
+                            : "bg-white border border-zinc-200 text-zinc-800 rounded-tl-none shadow-sm"
                 )}>
                     {isUser ? (
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -131,7 +134,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     )}
                 </div>
 
-                {!isUser && isStreaming && message.toolCalls && message.toolCalls.length > 0 && (
+                {!isUser && isStreaming && isLastMessage && message.toolCalls && message.toolCalls.length > 0 && (
                     <div className="mt-2 flex flex-col gap-1.5">
                         {[message.toolCalls[message.toolCalls.length - 1]].map((tool) => (
                             <div key={tool.id} className="flex items-center gap-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10 px-2 py-1 rounded-md border border-indigo-100/50 dark:border-indigo-900/20 w-fit animate-pulse">
