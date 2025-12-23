@@ -33,7 +33,7 @@ class Settings:
     GROQ_TEMPERATURE: float = float(os.environ.get("GROQ_TEMPERATURE", 0.2))
 
     # Chroma
-    CHROMA_PERSIST_DIR: str = os.environ.get("CHROMA_PERSIST_DIR", "./chroma_db")
+    CHROMA_PERSIST_DIR: str = os.environ.get("CHROMA_PERSIST_DIR", "backend/chroma_db")
 
     # Embeddings
     EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")

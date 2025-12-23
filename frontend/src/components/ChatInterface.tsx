@@ -283,7 +283,7 @@ export const ChatInterface: React.FC = () => {
                                 <p className="text-zinc-500 dark:text-zinc-400">Upload documents or images to start a conversation. I can read PDFs, images, Word docs, and more.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-3 w-full">
-                                {['Summarize a PDF', 'Analyze an image', 'Explain code', 'Extract text'].map((item) => (
+                                {['Summarize a PDF', 'Ask Anything', 'Explain code', 'Extract text'].map((item) => (
                                     <button
                                         key={item}
                                         onClick={() => setInput(item)}
