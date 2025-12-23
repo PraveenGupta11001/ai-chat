@@ -2,6 +2,8 @@
 
 A lightweight **Perplexity‑style** chat application that streams AI responses in real‑time, displays tool‑call progress, and lets users view source PDFs with clickable citations. The UI is polished with a dark/light theme, borderless input, subtle shadows, and smooth animations.
 
+<img width="1919" height="993" alt="image" src="https://github.com/user-attachments/assets/a8502907-01c8-40df-8e24-f6d8468812b0" />
+
 ---
 
 ## Table of Contents
