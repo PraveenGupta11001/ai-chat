@@ -30,3 +30,4 @@ langchain-groq
 pillow
 pdfplumber
 python-docx
+fastembed
