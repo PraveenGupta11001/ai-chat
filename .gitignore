@@ -9,9 +9,9 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 
 # Ignore chroma db
-chroma_db/*
-!chroma_db/
-!chroma_db/.gitkeep
+backend/chroma_db/*
+!backend/chroma_db/
+!backend/chroma_db/.gitkeep
 
 # Env file
 .env
